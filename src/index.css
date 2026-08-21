@@ -16,6 +16,19 @@
   color-scheme: light;
 }
 
+/* Modo oscuro (vista cliente) — escopado al wrapper .mesa-theme-root, nunca a :root,
+   para que el panel admin quede siempre en modo claro sin importar esta preferencia. */
+[data-theme='dark'] {
+  --color-bg: #1b1410;
+  --color-surface: #2a201a;
+  --color-primary: #e0703a;
+  --color-primary-dark: #c1440e;
+  --color-text: #f5ece4;
+  --color-muted: #b9a99b;
+  --color-border: #43342a;
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -31,6 +44,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 button {
@@ -117,6 +131,26 @@ a.btn {
 @keyframes pulse {
   0%, 100% { transform: scale(0.6); opacity: 0.5; }
   50% { transform: scale(1); opacity: 1; }
+}
+
+.mesa-theme-root {
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Transición suave al cambiar de modo claro/oscuro en la vista cliente */
+.mesa-theme-root,
+.mesa-page,
+.mesa-page__unavailable,
+.tracking-view,
+.menu-item-card,
+.category-tabs__tab,
+.quick-actions__btn,
+.cart-drawer__panel,
+.payment-method__chip,
+.theme-toggle-btn {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 /* ================= MESA (cliente) ================= */
@@ -295,6 +329,20 @@ a.btn {
   border-radius: 8px;
   font-size: 0.8rem;
   max-width: 220px;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  top: 0.8rem;
+  left: 0.8rem;
+  z-index: 25;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 999px;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* ---------- Carrito ---------- */
@@ -673,6 +721,19 @@ a.btn {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--color-text);
+  transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.2s ease;
+  animation: table-card-in 0.25s ease;
+}
+
+@keyframes table-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .table-card:disabled {

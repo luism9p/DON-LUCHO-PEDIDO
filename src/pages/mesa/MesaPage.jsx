@@ -9,6 +9,8 @@ import CartDrawer from '../../components/cart/CartDrawer'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import OrderTrackingView from './OrderTrackingView'
 import QuickActions from '../../components/mesa/QuickActions'
+import ThemeToggleButton from '../../components/mesa/ThemeToggleButton'
+import { useTheme } from '../../hooks/useTheme'
 import { supabase } from '../../lib/supabaseClient'
 import {
   clearStoredOrderId,
@@ -133,22 +135,34 @@ export default function MesaPage() {
   const { tableId } = useParams()
   const numero = Number(tableId)
   const { table, loading, error } = useTable(numero)
+  const { theme, toggleTheme } = useTheme()
 
-  if (loading) return <LoadingSpinner label="Cargando mesa…" />
+  if (loading) {
+    return (
+      <div data-theme={theme} className="mesa-theme-root">
+        <LoadingSpinner label="Cargando mesa…" />
+      </div>
+    )
+  }
 
   if (error || !table || !table.activa) {
     return (
-      <div className="mesa-page__unavailable">
-        <h1>Mesa no disponible</h1>
-        <p>Pide ayuda a un mesero de Don Lucho para continuar.</p>
+      <div data-theme={theme} className="mesa-theme-root">
+        <div className="mesa-page__unavailable">
+          <h1>Mesa no disponible</h1>
+          <p>Pide ayuda a un mesero de Don Lucho para continuar.</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <CartProvider>
-      <MesaMenu table={table} />
-      <QuickActions tableId={table.id} />
-    </CartProvider>
+    <div data-theme={theme} className="mesa-theme-root">
+      <CartProvider>
+        <MesaMenu table={table} />
+        <QuickActions tableId={table.id} />
+        <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
+      </CartProvider>
+    </div>
   )
 }
