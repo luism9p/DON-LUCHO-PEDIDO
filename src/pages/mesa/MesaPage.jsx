@@ -9,6 +9,11 @@ import CartDrawer from '../../components/cart/CartDrawer'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import OrderTrackingView from './OrderTrackingView'
 import { supabase } from '../../lib/supabaseClient'
+import {
+  clearStoredOrderId,
+  getStoredOrderId,
+  setStoredOrderId,
+} from '../../utils/orderStorage'
 
 function MesaMenu({ table }) {
   const { categories, loading, error } = useMenu()
@@ -17,7 +22,12 @@ function MesaMenu({ table }) {
   const [cartOpen, setCartOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(null)
-  const [orderId, setOrderId] = useState(null)
+  const [orderId, setOrderId] = useState(() => getStoredOrderId(table.numero))
+
+  function resetOrder() {
+    clearStoredOrderId(table.numero)
+    setOrderId(null)
+  }
 
   const category = activeCategory ?? categories[0]?.categoria
   const visibleItems = categories.find((c) => c.categoria === category)?.items ?? []
@@ -56,6 +66,7 @@ function MesaMenu({ table }) {
     clear()
     setSubmitting(false)
     setCartOpen(false)
+    setStoredOrderId(table.numero, order.id)
     setOrderId(order.id)
   }
 
@@ -64,7 +75,7 @@ function MesaMenu({ table }) {
       <OrderTrackingView
         orderId={orderId}
         tableNumero={table.numero}
-        onNewOrder={() => setOrderId(null)}
+        onNewOrder={resetOrder}
       />
     )
   }

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 // Sigue en vivo el estado de un pedido puntual (pantalla "pedido enviado").
 export function useOrderTracking(orderId) {
   const [order, setOrder] = useState(null)
+  const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
     if (!orderId) return
@@ -14,9 +15,11 @@ export function useOrderTracking(orderId) {
       .from('orders')
       .select('*')
       .eq('id', orderId)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
-        if (!cancelled) setOrder(data)
+        if (cancelled) return
+        if (data) setOrder(data)
+        else setNotFound(true)
       })
 
     const channel = supabase
@@ -39,5 +42,5 @@ export function useOrderTracking(orderId) {
     }
   }, [orderId])
 
-  return order
+  return { order, notFound }
 }

@@ -1,9 +1,14 @@
+import { useEffect } from 'react'
 import { useOrderTracking } from '../../hooks/useOrderTracking'
 import { STATUS_FLOW, STATUS_LABEL } from '../../utils/orderStatus'
 import { formatCurrency } from '../../utils/format'
 
 export default function OrderTrackingView({ orderId, tableNumero, onNewOrder }) {
-  const order = useOrderTracking(orderId)
+  const { order, notFound } = useOrderTracking(orderId)
+
+  useEffect(() => {
+    if (notFound) onNewOrder()
+  }, [notFound, onNewOrder])
 
   if (!order) {
     return (
