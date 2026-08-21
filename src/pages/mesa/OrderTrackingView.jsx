@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useOrderTracking } from '../../hooks/useOrderTracking'
 import { STATUS_FLOW, STATUS_LABEL } from '../../utils/orderStatus'
 import { formatCurrency } from '../../utils/format'
+import ThankYouView from './ThankYouView'
 
 export default function OrderTrackingView({ orderId, tableNumero, onNewOrder }) {
   const { order, notFound } = useOrderTracking(orderId)
@@ -16,6 +17,10 @@ export default function OrderTrackingView({ orderId, tableNumero, onNewOrder }) 
         <p>Cargando tu pedido…</p>
       </div>
     )
+  }
+
+  if (order.estado === 'entregado') {
+    return <ThankYouView tableNumero={tableNumero} onNewOrder={onNewOrder} />
   }
 
   const currentIndex = STATUS_FLOW.indexOf(order.estado)
@@ -46,12 +51,6 @@ export default function OrderTrackingView({ orderId, tableNumero, onNewOrder }) 
         <span>Total</span>
         <strong>{formatCurrency(order.total)}</strong>
       </div>
-
-      {order.estado === 'entregado' && (
-        <button type="button" className="btn btn--primary" onClick={onNewOrder}>
-          Hacer otro pedido
-        </button>
-      )}
     </div>
   )
 }

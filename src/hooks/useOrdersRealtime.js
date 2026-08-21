@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useAlertSound } from './useAlertSound'
 
 function startOfToday() {
   const d = new Date()
@@ -11,28 +12,7 @@ function startOfToday() {
 export function useOrdersRealtime() {
   const [orders, setOrders] = useState([])
   const [lastInsertedId, setLastInsertedId] = useState(null)
-  const audioCtxRef = useRef(null)
-
-  const playAlert = useCallback(() => {
-    try {
-      const Ctx = window.AudioContext || window.webkitAudioContext
-      if (!Ctx) return
-      if (!audioCtxRef.current) audioCtxRef.current = new Ctx()
-      const ctx = audioCtxRef.current
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.value = 880
-      gain.gain.setValueAtTime(0.2, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4)
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start()
-      osc.stop(ctx.currentTime + 0.4)
-    } catch {
-      // Autoplay puede estar bloqueado hasta la primera interacción; se ignora.
-    }
-  }, [])
+  const playAlert = useAlertSound()
 
   const fetchOrders = useCallback(async () => {
     const { data, error } = await supabase

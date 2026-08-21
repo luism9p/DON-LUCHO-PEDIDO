@@ -1,8 +1,16 @@
 import { useCart } from '../../context/CartContext'
 import { formatCurrency } from '../../utils/format'
 import CartItemRow from './CartItemRow'
+import PaymentMethodSelector from './PaymentMethodSelector'
 
-export default function CartDrawer({ open, onClose, onConfirm, submitting }) {
+export default function CartDrawer({
+  open,
+  onClose,
+  onConfirm,
+  submitting,
+  paymentMethod,
+  onPaymentMethodChange,
+}) {
   const { items, total, setQuantity, setNote, removeItem } = useCart()
 
   return (
@@ -32,6 +40,10 @@ export default function CartDrawer({ open, onClose, onConfirm, submitting }) {
           </div>
         )}
 
+        {items.length > 0 && (
+          <PaymentMethodSelector value={paymentMethod} onChange={onPaymentMethodChange} />
+        )}
+
         <footer className="cart-drawer__footer">
           <div className="cart-drawer__total">
             <span>Total</span>
@@ -40,7 +52,7 @@ export default function CartDrawer({ open, onClose, onConfirm, submitting }) {
           <button
             type="button"
             className="btn btn--primary btn--block"
-            disabled={items.length === 0 || submitting}
+            disabled={items.length === 0 || !paymentMethod || submitting}
             onClick={onConfirm}
           >
             {submitting ? 'Enviando…' : 'Confirmar pedido'}

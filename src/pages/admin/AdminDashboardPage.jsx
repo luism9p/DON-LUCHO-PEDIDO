@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTables } from '../../hooks/useTables'
 import { useOrdersRealtime } from '../../hooks/useOrdersRealtime'
+import { useTableRequestsRealtime } from '../../hooks/useTableRequestsRealtime'
+import { useAlertSound } from '../../hooks/useAlertSound'
 import { useAuth } from '../../context/AuthContext'
 import TableCard from '../../components/admin/TableCard'
 import OrderDetailPanel from '../../components/admin/OrderDetailPanel'
 import StatusBadge from '../../components/admin/StatusBadge'
+import PendingRequestsBanner from '../../components/admin/PendingRequestsBanner'
 import { formatCurrency } from '../../utils/format'
 
 export default function AdminDashboardPage() {
   const tables = useTables()
   const { orders, lastInsertedId } = useOrdersRealtime()
+  const playRequestAlert = useAlertSound()
+  const { requests, resolveRequest } = useTableRequestsRealtime(playRequestAlert)
   const { signOut } = useAuth()
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [highlightId, setHighlightId] = useState(null)
@@ -60,6 +65,12 @@ export default function AdminDashboardPage() {
           Cerrar sesión
         </button>
       </header>
+
+      <PendingRequestsBanner
+        requests={requests}
+        tables={tables}
+        onResolve={resolveRequest}
+      />
 
       <section className="admin-dashboard__grid">
         {tables.map((table) => (

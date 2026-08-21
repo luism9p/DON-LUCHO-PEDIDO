@@ -8,6 +8,7 @@ import MenuItemCard from '../../components/menu/MenuItemCard'
 import CartDrawer from '../../components/cart/CartDrawer'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import OrderTrackingView from './OrderTrackingView'
+import QuickActions from '../../components/mesa/QuickActions'
 import { supabase } from '../../lib/supabaseClient'
 import {
   clearStoredOrderId,
@@ -22,6 +23,7 @@ function MesaMenu({ table }) {
   const [cartOpen, setCartOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+  const [paymentMethod, setPaymentMethod] = useState(null)
   const [orderId, setOrderId] = useState(() => getStoredOrderId(table.numero))
 
   function resetOrder() {
@@ -38,7 +40,7 @@ function MesaMenu({ table }) {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({ table_id: table.id, total })
+      .insert({ table_id: table.id, total, metodo_pago: paymentMethod })
       .select()
       .single()
 
@@ -66,6 +68,7 @@ function MesaMenu({ table }) {
     clear()
     setSubmitting(false)
     setCartOpen(false)
+    setPaymentMethod(null)
     setStoredOrderId(table.numero, order.id)
     setOrderId(order.id)
   }
@@ -119,6 +122,8 @@ function MesaMenu({ table }) {
         onClose={() => setCartOpen(false)}
         onConfirm={confirmOrder}
         submitting={submitting}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={setPaymentMethod}
       />
     </div>
   )
@@ -143,6 +148,7 @@ export default function MesaPage() {
   return (
     <CartProvider>
       <MesaMenu table={table} />
+      <QuickActions tableId={table.id} />
     </CartProvider>
   )
 }

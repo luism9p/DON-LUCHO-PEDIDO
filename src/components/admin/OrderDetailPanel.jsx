@@ -4,6 +4,13 @@ import { formatCurrency } from '../../utils/format'
 import { STATUS_LABEL, nextStatus } from '../../utils/orderStatus'
 import StatusBadge from './StatusBadge'
 
+const PAYMENT_LABEL = {
+  efectivo: 'Efectivo',
+  yape: 'Yape',
+  plin: 'Plin',
+  tarjeta: 'Tarjeta',
+}
+
 export default function OrderDetailPanel({ order, tableNumero, onClose }) {
   const { items, loading } = useOrderItems(order?.id)
 
@@ -48,7 +55,14 @@ export default function OrderDetailPanel({ order, tableNumero, onClose }) {
         )}
 
         <div className="order-detail__total">
-          <span>Total</span>
+          <span>
+            Total
+            {order.metodo_pago && (
+              <span className="order-detail__payment-tag">
+                {PAYMENT_LABEL[order.metodo_pago]}
+              </span>
+            )}
+          </span>
           <strong>{formatCurrency(order.total)}</strong>
         </div>
 
