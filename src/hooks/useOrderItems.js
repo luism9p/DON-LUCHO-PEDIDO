@@ -16,7 +16,7 @@ export function useOrderItems(orderId) {
 
     supabase
       .from('order_items')
-      .select('id, cantidad, nota, menu_items ( nombre, precio )')
+      .select('id, cantidad, nota, listo, menu_items ( nombre, precio )')
       .eq('order_id', orderId)
       .then(({ data, error }) => {
         if (cancelled) return
@@ -29,5 +29,10 @@ export function useOrderItems(orderId) {
     }
   }, [orderId])
 
-  return { items, loading }
+  async function toggleListo(itemId, listo) {
+    setItems((prev) => prev.map((it) => (it.id === itemId ? { ...it, listo } : it)))
+    await supabase.from('order_items').update({ listo }).eq('id', itemId)
+  }
+
+  return { items, loading, toggleListo }
 }

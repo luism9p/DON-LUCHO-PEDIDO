@@ -3,11 +3,14 @@ import { useTables } from '../../hooks/useTables'
 import { useOrdersRealtime } from '../../hooks/useOrdersRealtime'
 import { useTableRequestsRealtime } from '../../hooks/useTableRequestsRealtime'
 import { useAlertSound } from '../../hooks/useAlertSound'
+import { useShiftStats } from '../../hooks/useShiftStats'
 import { useAuth } from '../../context/AuthContext'
 import TableCard from '../../components/admin/TableCard'
 import OrderDetailPanel from '../../components/admin/OrderDetailPanel'
 import StatusBadge from '../../components/admin/StatusBadge'
 import PendingRequestsBanner from '../../components/admin/PendingRequestsBanner'
+import FilterTabs from '../../components/admin/FilterTabs'
+import ShiftStats from '../../components/admin/ShiftStats'
 import { formatCurrency } from '../../utils/format'
 
 export default function AdminDashboardPage() {
@@ -15,9 +18,11 @@ export default function AdminDashboardPage() {
   const { orders, lastInsertedId } = useOrdersRealtime()
   const playRequestAlert = useAlertSound()
   const { requests, resolveRequest } = useTableRequestsRealtime(playRequestAlert)
+  const { revenue, topSeller } = useShiftStats(orders)
   const { signOut } = useAuth()
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [highlightId, setHighlightId] = useState(null)
+  const [filter, setFilter] = useState('todas')
 
   useEffect(() => {
     if (!lastInsertedId) return
@@ -46,6 +51,12 @@ export default function AdminDashboardPage() {
     [orders]
   )
 
+  const visibleTables = useMemo(() => {
+    if (filter === 'activas') return tables.filter((t) => activeByTable.has(t.id))
+    if (filter === 'libres') return tables.filter((t) => !activeByTable.has(t.id))
+    return tables
+  }, [tables, activeByTable, filter])
+
   const selectedTable = selectedOrder
     ? tables.find((t) => t.id === selectedOrder.table_id)
     : null
@@ -72,8 +83,12 @@ export default function AdminDashboardPage() {
         onResolve={resolveRequest}
       />
 
+      <ShiftStats revenue={revenue} topSeller={topSeller} />
+
+      <FilterTabs active={filter} onSelect={setFilter} />
+
       <section className="admin-dashboard__grid">
-        {tables.map((table) => (
+        {visibleTables.map((table) => (
           <TableCard
             key={table.id}
             table={table}

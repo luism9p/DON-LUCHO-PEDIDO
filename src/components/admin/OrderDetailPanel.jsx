@@ -12,7 +12,7 @@ const PAYMENT_LABEL = {
 }
 
 export default function OrderDetailPanel({ order, tableNumero, onClose }) {
-  const { items, loading } = useOrderItems(order?.id)
+  const { items, loading, toggleListo } = useOrderItems(order?.id)
 
   if (!order) return null
 
@@ -21,6 +21,9 @@ export default function OrderDetailPanel({ order, tableNumero, onClose }) {
   }
 
   const upcoming = nextStatus(order.estado)
+  const canBatchPrep = order.estado === 'nuevo' || order.estado === 'preparando'
+  const allItemsReady = items.length > 0 && items.every((it) => it.listo)
+  const showQuickComplete = canBatchPrep && allItemsReady && order.estado !== 'listo'
 
   return (
     <div className="order-detail">
@@ -41,7 +44,16 @@ export default function OrderDetailPanel({ order, tableNumero, onClose }) {
         ) : (
           <ul className="order-detail__items">
             {items.map((it) => (
-              <li key={it.id}>
+              <li key={it.id} className={it.listo ? 'is-ready' : ''}>
+                {canBatchPrep && (
+                  <input
+                    type="checkbox"
+                    className="order-detail__item-check"
+                    checked={it.listo}
+                    onChange={(e) => toggleListo(it.id, e.target.checked)}
+                    aria-label={`${it.menu_items?.nombre} listo`}
+                  />
+                )}
                 <span className="order-detail__qty">{it.cantidad}×</span>
                 <span className="order-detail__name">{it.menu_items?.nombre}</span>
                 {it.nota && <span className="order-detail__note">"{it.nota}"</span>}
@@ -67,10 +79,19 @@ export default function OrderDetailPanel({ order, tableNumero, onClose }) {
         </div>
 
         <div className="order-detail__actions">
-          {upcoming && (
+          {showQuickComplete && (
             <button
               type="button"
               className="btn btn--primary btn--block"
+              onClick={() => updateStatus('listo')}
+            >
+              ✓ Todos los ítems listos — marcar pedido como Listo
+            </button>
+          )}
+          {upcoming && (
+            <button
+              type="button"
+              className={`btn btn--block ${showQuickComplete ? '' : 'btn--primary'}`}
               onClick={() => updateStatus(upcoming)}
             >
               Marcar como {STATUS_LABEL[upcoming]}
